@@ -15,6 +15,14 @@ config :hostaway,
   hostaway_client_secret: {:system, :string, "CLIENT_SECRET"},
   hostaway_scope: {:system, :string, "SCOPE"}
 
+# CORS configuration
+# config :cors_plug,
+#   # origin: [{:system, :string, "CORS_URL"}],
+#   origin: ["http://localhost:4000"],
+#   max_age: 86400,
+#   methods: ["GET", "POST"]
+
+
 # Configures the endpoint
 config :hostaway, HostawayWeb.Endpoint,
   url: [host: "localhost"],
