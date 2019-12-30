@@ -52,7 +52,8 @@ defmodule JSONAPI.Calendar do
     end
 
     defp map_calendar_days(json) do
-        filtered = Enum.filter(Poison.decode!(json)["result"], fn(elem) -> elem["isAvailable"] == 0 end)
+        # filtered = Enum.filter(Poison.decode!(json)["result"], fn(elem) -> elem["isAvailable"] == 0 end)
+        filtered = Poison.decode!(json)["result"]
         case Enum.empty?(filtered) do
             true -> %{}
             false -> 
