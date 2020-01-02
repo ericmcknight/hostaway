@@ -15,5 +15,7 @@ defmodule HostawayWeb.Router do
     get "/listings", ListingsController, :index
     get "/listings/:listing_id", ListingsController, :show
     get "/listings/:listing_id/calendar", ListingsController, :calendar
+
+    get "/price/", PricingController, :index
   end
 end
