@@ -42,7 +42,9 @@ defmodule Hostaway.MixProject do
       {:timex, "~> 3.5"},
       {:confex, "~> 3.4.0"},
       {:httpoison, "~> 1.6.1"},
-      {:poison, "~> 3.1"}
+      {:poison, "~> 3.1"},
+
+      {:ecto, "~> 3.0"}
     ]
   end
 end

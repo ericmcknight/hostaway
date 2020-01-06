@@ -18,26 +18,19 @@ defmodule  JSONAPI.Pricing do
     end
 
     defp get_calendars(listing, start_date, end_date) do
-        if nil == listing do 
-            {:error, "No listing was found"}
-        end 
-
         case JSONAPI.Calendar.calendar(listing["id"], start_date, end_date) do
             {:error, reason} -> {:error, reason}
             {:ok, calendars} -> 
-                if Enum.empty?(calendars) do
-                    {:error, "No calendar data was found for the date range"}
+                cond do 
+                    Enum.empty?(calendars) -> {:error, "No calendar data was found for the date range"}
+                    Enum.any?(calendars, fn day -> false == day["is_available"] end) -> {:error, "At least one of the dates in the date range is not available"}
+                    true -> {:ok, %{"listing" => listing, "calendars" => calendars}}
                 end
-
-                if Enum.any?(calendars, fn day -> !day["is_available"] end) do
-                    {:error, "At least one of the dates in the date range is not available"}
-                end
-
-                {:ok, %{"listing" => listing, "calendars" => calendars}}
         end
     end
 
     defp calculate(param) do
+        # Logger.debug(param)
         case param do
             {:error, msg} -> {:error, msg}
             {:ok, values} -> 
@@ -54,14 +47,23 @@ defmodule  JSONAPI.Pricing do
                 deposit = listing["refundable_damage_deposit"]
                 total = subtotal + cleaning_fee + taxes + deposit
 
-                {:ok, %{
-                    "sub_total" => subtotal, 
-                    "cleaning_fee" => cleaning_fee,
-                    "taxes" => taxes,
-                    "refundable_damage_deposit" => deposit,
-                    "total" => total,
-                    "number_of_nights" => number_of_nights
-                }}
-        end
+                case JSONAPI.Stripe.get_client_secret_key(total) do
+                    {:error, reason} -> {:error, reason}
+                    {:ok, secret} -> 
+                        secret_key = secret["client_secret"]
+                        Logger.debug(secret_key)
+
+                        {:ok, %{
+                            "sub_total" => subtotal, 
+                            "cleaning_fee" => cleaning_fee,
+                            "taxes" => taxes,
+                            "refundable_damage_deposit" => deposit,
+                            "total" => total,
+                            "number_of_nights" => number_of_nights,
+                            "stripe_secret_key" => secret_key
+                        }}
+ 
+                end
+       end
     end
 end

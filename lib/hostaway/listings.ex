@@ -48,7 +48,7 @@ defmodule JSONAPI.Listings do
         {:ok, [map_listing(Poison.decode!(json)["result"])]}
     end
 
-    defp handle_singl_response({:ok, %{body: json}}) do
+    defp handle_single_response({:ok, %{body: json}}) do
         {:error, json}
     end
 
@@ -76,7 +76,9 @@ defmodule JSONAPI.Listings do
             "refundable_damage_deposit" => prop["refundableDamageDeposit"],
             "minimum_nights" => prop["minNights"],
             "person_capacity" => prop["personCapacity"],
-            "country_code" => prop["countryCode"]
+            "country_code" => prop["countryCode"],
+            "check_in_time" => prop["checkInTime"],
+            "check_out_time" => prop["checkOutTime"]
         } 
     end
 end

@@ -10,12 +10,12 @@ defmodule HostawayWeb.Router do
   scope "/api/v1", HostawayWeb do
     pipe_through :api
 
-    get "/auth", AuthController, :index
-    
     get "/listings", ListingsController, :index
     get "/listings/:listing_id", ListingsController, :show
     get "/listings/:listing_id/calendar", ListingsController, :calendar
 
-    get "/price/", PricingController, :index
+    get "/pricing", PricingController, :index
+
+    post "/booking", BookingController, :create
   end
 end
