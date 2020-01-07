@@ -60,7 +60,8 @@ defmodule  JSONAPI.Pricing do
                             "refundable_damage_deposit" => deposit,
                             "total" => total,
                             "number_of_nights" => number_of_nights,
-                            "stripe_secret_key" => secret_key
+                            "stripe_secret_key" => secret_key,
+                            "stripe_publishable_key" => JSONAPI.Settings.get_stripe_publishable_key()
                         }}
  
                 end

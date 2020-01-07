@@ -17,5 +17,7 @@ defmodule HostawayWeb.Router do
     get "/pricing", PricingController, :index
 
     post "/booking", BookingController, :create
+    options "/booking", BookingController, :nothing
+
   end
 end

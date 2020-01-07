@@ -13,7 +13,8 @@ config :hostaway,
   hostaway_grant_type: {:system, :string, "GRANT_TYPE"},
   hostaway_client_id: {:system, :string, "CLIENT_ID"},
   hostaway_client_secret: {:system, :string, "CLIENT_SECRET"},
-  hostaway_scope: {:system, :string, "SCOPE"}
+  hostaway_scope: {:system, :string, "SCOPE"},
+  stripe_publishable_key: {:system, :string, "STRIPE_PUBLISHABLE_KEY"}
 
 # CORS configuration
 # config :cors_plug,
