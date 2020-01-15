@@ -10,7 +10,7 @@ defmodule JSONAPI.Stripe do
         |> Keyword.put(:"Authorization", "Bearer sk_test_fDhVyQPAasAg0lAZiXC10S3B000ijtctiU")
  
         body = URI.encode_query(%{
-            "amount" => 1099, # amount, 
+            "amount" => Kernel.trunc(amount * 100), # 1099,
             "currency" => "usd"})
         
         HTTPoison.post(url, body, headers)

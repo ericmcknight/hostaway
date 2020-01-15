@@ -7,4 +7,18 @@ defmodule HostawayWeb.ListingsView do
             :error -> %{data: %{state: state, message: result}}
         end
     end
+
+    def render("price.json", %{state: state, result: result}) do
+        case state do
+            :ok -> %{data: %{state: state, price: result}}
+            :error -> %{data: %{state: state, message: result}}
+        end
+    end
+
+    def render("reservations.json", %{success: state, result: result}) do
+        case state do
+            :ok -> %{data: %{state: state, reservations: result}}
+            :error -> %{data: %{state: state, message: result}}
+        end
+    end
 end
