@@ -36,7 +36,7 @@ defmodule JSONAPI.Calendar do
             false -> 
                 Enum.map(results, fn(day) ->
                 %{
-                    "date" => day["date"],
+                    "date" => day["date"] <> "T14:00:00Z",
                     "is_available" => day["isAvailable"] == 1,
                     "price" => day["price"],
                     "minimum_stay" => day["minimumStay"]

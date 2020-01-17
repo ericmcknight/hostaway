@@ -22,8 +22,9 @@ defmodule  JSONAPI.Pricing do
             {:error, reason} -> {:error, reason}
             {:ok, calendars} -> 
                 cond do 
-                    Enum.empty?(calendars) -> {:error, "No calendar data was found for the date range"}
-                    Enum.any?(calendars, fn day -> false == day["is_available"] end) -> {:error, "At least one of the dates in the date range is not available"}
+                    Enum.empty?(calendars) -> {:error, "No calendar data was found for the date range."}
+                    Enum.any?(calendars, fn day -> false == day["is_available"] end) -> {:error, "At least one of the dates in the date range is not available."}
+                    Enum.count(calendars) - 1 < Enum.at(calendars, 0)["minimum_stay"] -> {:error, "This property requires at least " <> Integer.to_string(Enum.at(calendars, 0)["minimum_stay"]) <> " nights per stay."}
                     true -> {:ok, %{"listing" => listing, "calendars" => calendars}}
                 end
         end

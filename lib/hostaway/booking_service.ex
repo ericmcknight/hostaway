@@ -18,27 +18,20 @@ defmodule JSONAPI.BookingService do
 
 
     defp pay_booking(params, token) do
-        reservation_id = params["reservation_id"]
-        is_paid = pay
-
-        url = JSONAPI.Settings.get_url() <> "reservations"
+        url = JSONAPI.Settings.get_url() <> "reservations/" <> params["reservation_id"]
 
         headers = [] 
         |> Keyword.put(:"Content-Type", "application/json")
         |> Keyword.put(:"Authorization", token["token"])
 
         body = Poison.encode!(%{
-            "channelId" => channel_id, 
-            "listingMapId" => listing_id,
-            "totalPrice" => total,
-            "taxAmount" => taxes,
-            "cleaningFee" => cleaning_fee,
-            "isPaid" => is_paid})
+            "isPaid" => true 
+        })
         
-        # Logger.debug(body)
         HTTPoison.post(url, body, headers)
         |> handle_response()
     end
+
 
     defp create_booking(params, token) do
         listing_id = params["listing_id"]
@@ -87,9 +80,9 @@ defmodule JSONAPI.BookingService do
             "taxAmount" => taxes,
             "cleaningFee" => cleaning_fee,
             "isPaid" => is_paid,
-            "currency" => "USD"})
+            "currency" => "USD"
+        })
         
-        # Logger.debug(body)
         HTTPoison.post(url, body, headers)
         |> handle_response()
     end
