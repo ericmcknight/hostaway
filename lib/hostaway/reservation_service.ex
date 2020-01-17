@@ -1,39 +1,37 @@
-defmodule JSONAPI.BookingService do
+defmodule JSONAPI.ReservationService do
     use HTTPoison.Base
     require Logger
+
+
+    def reservation(reservation_id) do
+        case JSONAPI.Authentication.auth() do
+            {:error, json} -> {:error, json}
+            {:ok, token} -> 
+                headers = []
+                |> Keyword.put(:"Content-Type", "application/json")
+                |> Keyword.put(:"Authorization", token["token"])
+
+                get(JSONAPI.Settings.get_url() <> "reservations/" <> reservation_id, headers)
+                |> handle_response()
+       end
+    end
 
     def new_booking(params) do
         case JSONAPI.Authentication.auth() do
             {:error, json} -> {:error, json}
-            {:ok, token} -> create_booking(params, token)
+            {:ok, token} -> create_reservation(params, token)
         end
     end 
 
-    def pay(params) do
+    def pay(reservation_id) do
         case JSONAPI.Authentication.auth() do
             {:error, json} -> {:error, json}
-            {:ok, token} -> create_booking(params, token)
+            {:ok, token} -> pay_for_reservation(reservation_id, token)
         end
     end
 
 
-    defp pay_booking(params, token) do
-        url = JSONAPI.Settings.get_url() <> "reservations/" <> params["reservation_id"]
-
-        headers = [] 
-        |> Keyword.put(:"Content-Type", "application/json")
-        |> Keyword.put(:"Authorization", token["token"])
-
-        body = Poison.encode!(%{
-            "isPaid" => true 
-        })
-        
-        HTTPoison.post(url, body, headers)
-        |> handle_response()
-    end
-
-
-    defp create_booking(params, token) do
+    defp create_reservation(params, token) do
         listing_id = params["listing_id"]
         arrival = params["arrival_date"]
         depart = params["departure_date"]
@@ -86,8 +84,25 @@ defmodule JSONAPI.BookingService do
         HTTPoison.post(url, body, headers)
         |> handle_response()
     end
+
+    defp pay_for_reservation(reservation_id, token) do
+        url = JSONAPI.Settings.get_url() <> "reservations/" <> reservation_id
+
+        headers = [] 
+        |> Keyword.put(:"Content-Type", "application/json")
+        |> Keyword.put(:"Authorization", token["token"])
+
+        body = Poison.encode!(%{
+            "isPaid" => true 
+        })
+        
+        HTTPoison.put(url, body, headers)
+        |> handle_response()
+    end
+
     
     defp handle_response({:ok, %{status_code: 200, body: json}}) do
+        # Logger.debug(json)
         {:ok, [map_reservation(Poison.decode!(json)["result"])]}
     end
 
@@ -99,7 +114,6 @@ defmodule JSONAPI.BookingService do
         msg = "Http error from hostaway.com. " <> reason
         {:error, msg}
     end
-
 
     defp map_reservation(prop) do
         %{
@@ -120,6 +134,7 @@ defmodule JSONAPI.BookingService do
             "cleaning_fee" => prop["cleaningFee"],
             "check_out_time" => prop["checkOutTime"],
             "total" => prop["totalPrice"],
+            "is_paid" => prop["isPaid"] == 1,
         } 
     end
 end

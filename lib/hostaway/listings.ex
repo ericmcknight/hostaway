@@ -52,7 +52,6 @@ defmodule JSONAPI.Listings do
         {:error, json}
     end
 
-
     defp map_listing(prop) do
         %{
             "id" => prop["id"],

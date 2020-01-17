@@ -18,7 +18,8 @@ defmodule HostawayWeb.Router do
     post "/listings/:listing_id/reserve", ListingsController, :create_reservation
     options "/listings/:listing_id/reserve", ListingsController, :create_reservation
 
-    put "/reservations/:reservation_id/pay", ListingsController, :pay_reservation
+    get "/reservations/:reservation_id", ReservationsController, :show
+    put "/reservations/:reservation_id/pay", ReservationsController, :pay
 
   end
 end

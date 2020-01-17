@@ -23,12 +23,7 @@ defmodule HostawayWeb.ListingsController do
     end
 
     def create_reservation(conn, %{"reservation" => reservation_params}) do
-        {success, value} = JSONAPI.BookingService.new_booking(reservation_params)
-        render(conn, "reservations.json", %{success: success, result: value})
-    end
-
-    def pay_reservation(conn, %{"reservation" => reservation_params}) do
-        {success, value} = JSONAPI.BookingService.pay(reservation_params)
-        render(conn, "reservations.json", %{success: success, result: value})
+        {success, value} = JSONAPI.ReservationService.new_booking(reservation_params)
+        render(conn, "reservation.json", %{success: success, result: value})
     end
 end
