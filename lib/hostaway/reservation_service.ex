@@ -16,7 +16,7 @@ defmodule JSONAPI.ReservationService do
        end
     end
 
-    def new_booking(params) do
+    def create(params) do
         case JSONAPI.Authentication.auth() do
             {:error, json} -> {:error, json}
             {:ok, token} -> create_reservation(params, token)
