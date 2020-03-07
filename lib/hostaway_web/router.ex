@@ -20,6 +20,7 @@ defmodule HostawayWeb.Router do
 
     get "/reservations/:reservation_id", ReservationsController, :show
     put "/reservations/:reservation_id/pay", ReservationsController, :pay
+    options "/reservations/:reservation_id/pay", ReservationsController, :pay
 
   end
 end

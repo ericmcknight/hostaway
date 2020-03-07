@@ -37,6 +37,7 @@ defmodule JSONAPI.ReservationService do
         depart = params["departure_date"]
         channel_id = 2000 # direct reservation
         source = "socialSphereApi"
+        status = "awaitingPayment"
 
         first_name = params["first_name"]
         last_name = params["last_name"]
@@ -52,7 +53,7 @@ defmodule JSONAPI.ReservationService do
         taxes = params["taxes"]
         cleaning_fee = params["cleaning_fee"]
         # security_deposit = params["damage_deposit"]
-        is_paid = params["is_paid"]
+        is_paid = false # params["is_paid"]
 
         url = JSONAPI.Settings.get_url() <> "reservations"
 
@@ -78,7 +79,8 @@ defmodule JSONAPI.ReservationService do
             "taxAmount" => taxes,
             "cleaningFee" => cleaning_fee,
             "isPaid" => is_paid,
-            "currency" => "USD"
+            "currency" => "USD",
+            "status" => status
         })
         
         HTTPoison.post(url, body, headers)
@@ -93,7 +95,8 @@ defmodule JSONAPI.ReservationService do
         |> Keyword.put(:"Authorization", token["token"])
 
         body = Poison.encode!(%{
-            "isPaid" => true 
+            "isPaid" => true,
+            "status" => "new"
         })
         
         HTTPoison.put(url, body, headers)
