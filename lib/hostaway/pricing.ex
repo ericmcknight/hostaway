@@ -48,7 +48,7 @@ defmodule  JSONAPI.Pricing do
                 deposit = listing["refundable_damage_deposit"]
                 total = subtotal + cleaning_fee + taxes + deposit
 
-                case JSONAPI.Stripe.get_client_secret_key(total) do
+                case JSONAPI.Stripe.create_payment_intent(total) do
                     {:error, reason} -> {:error, reason}
                     {:ok, secret} -> 
                         secret_key = secret["client_secret"]

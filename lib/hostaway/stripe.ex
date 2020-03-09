@@ -2,12 +2,13 @@ defmodule JSONAPI.Stripe do
     use HTTPoison.Base
     require Logger
 
-    def get_client_secret_key(amount) do
+
+    def create_payment_intent(amount) do
         url = "https://api.stripe.com/v1/payment_intents"
 
         headers = [] 
         |> Keyword.put(:"Content-Type", "application/x-www-form-urlencoded")
-        |> Keyword.put(:"Authorization", "Bearer sk_test_fDhVyQPAasAg0lAZiXC10S3B000ijtctiU")
+        |> Keyword.put(:"Authorization", "Bearer " <> JSONAPI.Settings.get_stripe_secret_key())
  
         body = URI.encode_query(%{
             "amount" => Kernel.trunc(amount * 100), # 1099,
@@ -16,6 +17,7 @@ defmodule JSONAPI.Stripe do
         HTTPoison.post(url, body, headers)
         |> handle_response()
     end
+
 
     defp handle_response({:ok, %{status_code: 200, body: json}}) do
         stripe_response = Poison.decode!(json)
