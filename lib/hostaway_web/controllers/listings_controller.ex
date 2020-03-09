@@ -2,7 +2,7 @@ defmodule HostawayWeb.ListingsController do
     use HostawayWeb, :controller
     require Logger
 
-    def index(conn, params) do
+    def index(conn, _) do
         {success, value} = JSONAPI.Listings.listings()
         render(conn, "index.json", %{success: success, result: value})
     end

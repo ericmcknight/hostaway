@@ -14,7 +14,7 @@ config :hostaway,
   hostaway_client_id: {:system, :string, "CLIENT_ID"},
   hostaway_client_secret: {:system, :string, "CLIENT_SECRET"},
   hostaway_scope: {:system, :string, "SCOPE"},
-  stripe_publishable_key: {:system, :string, "STRIPE_PUBLISHABLE_KEY"}
+  stripe_publishable_key: {:system, :string, "STRIPE_PUBLISHABLE_KEY"},
   stripe_secret_key: {:system, :string, "STRIPE_PRIVATE_KEY"}
 
 # CORS configuration

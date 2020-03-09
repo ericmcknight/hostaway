@@ -23,7 +23,7 @@ defmodule HostawayWeb.PricingControllerTest do
         startDate = Timex.shift(Timex.now, years: 2)
         endDate = Timex.shift(startDate, days: -2)
 
-        {success, value} = JSONAPI.Pricing.price(@listing_id, format_date(startDate), format_date(endDate))
+        {success, _} = JSONAPI.Pricing.price(@listing_id, format_date(startDate), format_date(endDate))
         assert :error == success
     end
 
