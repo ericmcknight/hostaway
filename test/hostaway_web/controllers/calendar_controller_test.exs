@@ -10,7 +10,7 @@ defmodule HostawayWeb.CalendarControllerTest do
         startDate = Timex.shift(Timex.now, months: 2)
         endDate = Timex.shift(startDate, days: 4)
 
-        {success, value} = JSONAPI.Calendar.calendar(@listing_id, format_date(startDate), format_date(endDate))
+        {success, value} = HostawayService.get_calendars(@listing_id, format_date(startDate), format_date(endDate))
         Logger.debug(Enum.at(value,0)["date"])
 
         assert :ok == success
@@ -20,7 +20,7 @@ defmodule HostawayWeb.CalendarControllerTest do
         startDate = Timex.shift(Timex.now, days: -2)
         endDate = Timex.shift(startDate, days: 4)
 
-        {success, _} = JSONAPI.Calendar.calendar(@listing_id, format_date(startDate), format_date(endDate))
+        {success, _} = HostawayService.get_calendars(@listing_id, format_date(startDate), format_date(endDate))
 
         assert :error == success
     end
@@ -28,24 +28,24 @@ defmodule HostawayWeb.CalendarControllerTest do
 
 
     test "Get calendar - parsing valid date" do
-        {result, _} = JSONAPI.Calendar.parse_date_text(format_date(Timex.now)) 
+        {result, _} = CalendarService.parse_date_text(format_date(Timex.now)) 
         assert :ok == result
     end
 
 
 
     test "Date is less than today" do
-        result = JSONAPI.Calendar.is_less_than_today(Timex.shift(Timex.now, days: -1))
+        result = CalendarService.is_less_than_today(Timex.shift(Timex.now, days: -1))
         assert true == result
     end
 
     test "Date is today" do
-        result = JSONAPI.Calendar.is_less_than_today(Timex.now)
+        result = CalendarService.is_less_than_today(Timex.now)
         assert false == result
     end
 
     test "Date is greater than today" do
-        result = JSONAPI.Calendar.is_less_than_today(Timex.shift(Timex.now, days: 1))
+        result = CalendarService.is_less_than_today(Timex.shift(Timex.now, days: 1))
         assert false == result
     end
 

@@ -1,16 +1,16 @@
-defmodule JSONAPI.Listings do
+defmodule ListingsService do
     use HTTPoison.Base
     require Logger
     
-    def listings() do
-        case JSONAPI.Authentication.auth() do
+    def get_listings() do
+        case AuthenticationService.auth() do
             {:error, json} -> {:error, json}
             {:ok, token} -> 
                 headers = []
                 |> Keyword.put(:"Content-Type", "application/json")
                 |> Keyword.put(:"Authorization", token["token"])
 
-                get(JSONAPI.Settings.get_url() <> "listings/", headers)
+                get(SettingsService.get_url() <> "listings/", headers)
                 |> handle_list_response()
        end
     end
@@ -31,15 +31,15 @@ defmodule JSONAPI.Listings do
     end
 
 
-    def listings(listing_id) do
-        case JSONAPI.Authentication.auth() do
+    def get_listing(listing_id) do
+        case AuthenticationService.auth() do
             {:error, json} -> {:error, json}
             {:ok, token} -> 
                 headers = []
                 |> Keyword.put(:"Content-Type", "application/json")
                 |> Keyword.put(:"Authorization", token["token"])
 
-                get(JSONAPI.Settings.get_url() <> "listings/" <> listing_id, headers)
+                get(SettingsService.get_url() <> "listings/" <> listing_id, headers)
                 |> handle_single_response()
        end
     end

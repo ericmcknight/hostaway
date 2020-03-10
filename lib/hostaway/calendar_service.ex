@@ -1,14 +1,14 @@
-defmodule JSONAPI.Calendar do
+defmodule CalendarService do
     use HTTPoison.Base
     use Timex
     require Logger
 
 
-    def calendar(listing_id, start_date_text, end_date_text) do
+    def get_calendars(listing_id, start_date_text, end_date_text) do
         case validate_dates(start_date_text, end_date_text) do
             {:error, term} -> {:error, term}
             {:ok} -> 
-                case JSONAPI.Authentication.auth() do
+                case AuthenticationService.auth() do
                     {:error, json}  -> {:error, json}
                     {:ok, token}    -> get_calendar(listing_id, start_date_text, end_date_text, token)
                 end
@@ -40,11 +40,10 @@ defmodule JSONAPI.Calendar do
             end 
         end
     end
-
     
     defp get_calendar(listing_id, start_date, end_date, token) do
         query_string = URI.encode_query([startDate: start_date, endDate: end_date])
-        url = JSONAPI.Settings.get_url() <> "listings/#{listing_id}/calendar?" <> query_string
+        url = SettingsService.get_url() <> "listings/#{listing_id}/calendar?" <> query_string
 
         headers = []
         |> Keyword.put(:"Content-Type", "application/json")
@@ -53,7 +52,6 @@ defmodule JSONAPI.Calendar do
         get(url, headers)
         |> handle_response()
     end
-
 
     def parse_date_text(text) do
         Timex.parse(text, "{YYYY}-{0M}-{0D}") 
@@ -65,11 +63,6 @@ defmodule JSONAPI.Calendar do
             0   -> false
             -1  -> false 
         end
-    end
-
-
-    defp handle_response({:ok, %{status_code: 200, body: json}}) do
-        {:ok, map_calendar_days(json)}
     end
 
     defp map_calendar_days(json) do
@@ -87,6 +80,10 @@ defmodule JSONAPI.Calendar do
                 } 
                 end)
         end
+    end
+
+    defp handle_response({:ok, %{status_code: 200, body: json}}) do
+        {:ok, map_calendar_days(json)}
     end
 
     defp handle_response({:ok, %{body: json}}) do

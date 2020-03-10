@@ -11,7 +11,7 @@ defmodule HostawayWeb.PricingControllerTest do
         startDate = Timex.shift(Timex.now, years: 2)
         endDate = Timex.shift(startDate, days: 4)
 
-        {success, value} = JSONAPI.Pricing.price(@listing_id, format_date(startDate), format_date(endDate))
+        {success, value} = HostawayService.get_price(@listing_id, format_date(startDate), format_date(endDate))
 
         assert :ok == success
         assert nil != value
@@ -23,19 +23,19 @@ defmodule HostawayWeb.PricingControllerTest do
         startDate = Timex.shift(Timex.now, years: 2)
         endDate = Timex.shift(startDate, days: -2)
 
-        {success, _} = JSONAPI.Pricing.price(@listing_id, format_date(startDate), format_date(endDate))
+        {success, _} = HostawayService.get_price(@listing_id, format_date(startDate), format_date(endDate))
         assert :error == success
     end
 
 
     test "Less than minimum number of nights" do
-        {_, value} = JSONAPI.Listings.listings(@listing_id)
+        {_, value} = ListingsService.get_listing(@listing_id)
         listing = List.first(value)
 
         startDate = Timex.shift(Timex.now, years: 2)
         endDate = Timex.shift(startDate, days: listing["minimum_nights"] - 2)
 
-        {success, value} = JSONAPI.Pricing.price(@listing_id, format_date(startDate), format_date(endDate))
+        {success, value} = HostawayService.get_price(@listing_id, format_date(startDate), format_date(endDate))
         assert :error == success, value
     end
 
@@ -44,7 +44,7 @@ defmodule HostawayWeb.PricingControllerTest do
         startDate = Timex.shift(Timex.now, months: -2)
         endDate = Timex.shift(startDate, days: 4)
 
-        {success, _} = JSONAPI.Pricing.price(@listing_id, format_date(startDate), format_date(endDate))
+        {success, _} = HostawayService.get_price(@listing_id, format_date(startDate), format_date(endDate))
         assert :error == success
     end
 
@@ -53,7 +53,7 @@ defmodule HostawayWeb.PricingControllerTest do
         startDate = Timex.shift(Timex.now, years: 4)
         endDate = Timex.shift(startDate, days: 4)
 
-        {success, _} = JSONAPI.Pricing.price(@listing_id, format_date(startDate), format_date(endDate))
+        {success, _} = HostawayService.get_price(@listing_id, format_date(startDate), format_date(endDate))
         assert :error == success
     end
 

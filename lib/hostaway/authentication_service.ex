@@ -1,8 +1,8 @@
-defmodule JSONAPI.Authentication do
+defmodule AuthenticationService do
     use HTTPoison.Base
     
     def auth() do
-        url = JSONAPI.Settings.get_url() <> "accessTokens"
+        url = SettingsService.get_url() <> "accessTokens"
 
         headers = [] 
         |> Keyword.put(:"Content-Type", "application/x-www-form-urlencoded")
@@ -19,6 +19,8 @@ defmodule JSONAPI.Authentication do
         |> handle_response()
     end
 
+
+
     defp handle_response({:ok, %{status_code: 200, body: json}}) do
         token = Poison.decode!(json)
         bearer = token["token_type"] <> " " <> token["access_token"]
@@ -33,7 +35,6 @@ defmodule JSONAPI.Authentication do
         msg = "Http error from hostaway.com. " <> reason
         {:error, msg}
     end
-
 
     defp get_grant_type() do
         Confex.fetch_env!(:hostaway, :hostaway_grant_type)
