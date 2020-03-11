@@ -24,8 +24,29 @@ defmodule HostawayService do
         ReservationService.get_reservation(reservation_id)
     end
 
-    def pay_reservation(reservation_id) do
-        ReservationService.pay(reservation_id)
+
+    def pay_reservation(reservation_id, params) do
+        pricing = %Pricing{
+            sub_total: params["subtotal"],
+            cleaning_fee: params["cleaning_fee"],
+            taxes: params["taxes"],
+            refundable_damage_deposit: params["refundable_damage_deposit"],
+            total: params["total"],
+            due_now: params["due_now"],
+            due_later: params["due_later"],
+            number_of_nights: params["number_of_nights"],
+            stripe_secret_key: params["stripe_secret_key"],
+            stripe_publishable_key: params["stripe_publishable_key"]
+        }
+
+        case ReservationService.pay(reservation_id) do
+            {:error, term} -> {:error, term}
+            {:ok, reservation} -> 
+                case ListingsService.get_listing(reservation.listing_id) do
+                    {:error, term} -> {:error, term}
+                    {:ok, listing} -> StripeService.create_invoices(reservation, listing, pricing)
+                end
+        end
     end
 
 

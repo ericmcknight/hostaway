@@ -7,9 +7,8 @@ defmodule PricingService do
     def get_price(listing_id, start_date, end_date) do
         case get_listing(listing_id) do
             {:error, reason} -> {:error, reason}
-            {:ok, listings} -> 
-                List.first(listings)
-                |> get_calendars(start_date, end_date)
+            {:ok, listing} -> 
+                get_calendars(listing, start_date, end_date)
                 |> calculate(start_date)
        end
     end
@@ -20,7 +19,7 @@ defmodule PricingService do
     end
 
     defp get_calendars(listing, start_date, end_date) do
-        case CalendarService.get_calendars(listing["id"], start_date, end_date) do
+        case CalendarService.get_calendars(listing.id, start_date, end_date) do
             {:error, reason} -> {:error, reason}
             {:ok, calendars} -> 
                 cond do 
@@ -42,12 +41,12 @@ defmodule PricingService do
                 calendars = values["calendars"] |> Enum.reverse() |> tl() |> Enum.reverse()
                 number_of_nights = Enum.count(calendars)
 
-                tax_rate = listing["tax_rate"]
-                cleaning_fee = listing["cleaning_fee"]
+                tax_rate = listing.tax_rate
+                cleaning_fee = listing.cleaning_fee
 
                 subtotal = Enum.reduce(calendars, 0, fn day, acc -> day["price"] + acc end)
                 taxes = Float.round((subtotal + cleaning_fee) * (tax_rate / 100), 2)
-                deposit = listing["refundable_damage_deposit"]
+                deposit = listing.refundable_damage_deposit
                 total = subtotal + cleaning_fee + taxes + deposit
                 
                 due_now = due_now(start_date, total - deposit)
@@ -56,8 +55,7 @@ defmodule PricingService do
                 case StripeService.create_payment_intent(due_now) do
                     {:error, reason} -> {:error, reason}
                     {:ok, secret} -> 
-                        Logger.debug(secret.client_secret_key)
-
+                        # Logger.debug(secret.client_secret_key)
                         pricing = %Pricing{
                             sub_total: subtotal,
                             cleaning_fee: cleaning_fee,

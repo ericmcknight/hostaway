@@ -7,8 +7,8 @@ defmodule HostawayWeb.ReservationsController do
         render(conn, "reservation.json", %{success: success, result: value})
     end
 
-    def pay(conn, %{"reservation_id" => reservation_id}) do
-        {success, value} = HostawayService.pay_reservation(reservation_id)
+    def pay(conn, %{"reservation_id" => reservation_id, "pricing" => params}) do
+        {success, value} = HostawayService.pay_reservation(reservation_id, params)
         render(conn, "reservation.json", %{success: success, result: value})
     end
 end

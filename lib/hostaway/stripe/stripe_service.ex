@@ -17,7 +17,7 @@ defmodule StripeService do
     end
 
 
-    def create_invoice(customer_id, due_date, email, phone) do
-        Stripe.InvoiceService.create_invoice(customer_id, due_date, email, phone)
+    def create_invoices(reservation, listing, pricing) do
+        Stripe.InvoiceService.create_invoice_initial_payment(reservation, listing, pricing)
     end
 end

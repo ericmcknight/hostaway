@@ -19,6 +19,10 @@ defmodule ListingsService do
         {:ok, map_listings(Poison.decode!(json)["result"])}
     end
 
+    defp handle_list_response({:ok, %{body: json}}) do
+        {:error, json}
+    end
+
     defp map_listings(results) do
         case Enum.empty?(results) do
             true -> %{}
@@ -26,9 +30,6 @@ defmodule ListingsService do
         end
     end
 
-    defp handle_list_response({:ok, %{body: json}}) do
-        {:error, json}
-    end
 
 
     def get_listing(listing_id) do
@@ -45,7 +46,7 @@ defmodule ListingsService do
     end
 
     defp handle_single_response({:ok, %{status_code: 200, body: json}}) do
-        {:ok, [map_listing(Poison.decode!(json)["result"])]}
+        {:ok, map_listing(Poison.decode!(json)["result"])}
     end
 
     defp handle_single_response({:ok, %{body: json}}) do
@@ -53,31 +54,31 @@ defmodule ListingsService do
     end
 
     defp map_listing(prop) do
-        %{
-            "id" => prop["id"],
-            "name" => prop["name"],
-            "description" => prop["description"],
-            "street" => prop["street"],
-            "address" => prop["address"],
-            "city" => prop["city"],
-            "state" => prop["state"],
-            "zipcode" => prop["zipcode"],
-            "lat" => prop["lat"],
-            "lng" => prop["lng"],
-            "room_type" => prop["roomType"],
-            "max_pets_allowed" => prop["maxPetsAllowed"],
-            "allow_same_day_booking" => prop["allowSameDayBooking"],
-            "bathrooms_number" => prop["bathroomsNumber"],
-            "bedrooms_number" => prop["bedroomsNumber"],
-            "price" => prop["price"],
-            "tax_rate" => prop["propertyRentTax"],
-            "cleaning_fee" => prop["cleaningFee"],
-            "refundable_damage_deposit" => prop["refundableDamageDeposit"],
-            "minimum_nights" => prop["minNights"],
-            "person_capacity" => prop["personCapacity"],
-            "country_code" => prop["countryCode"],
-            "check_in_time" => prop["checkInTime"],
-            "check_out_time" => prop["checkOutTime"]
+        %Listing{
+            id: prop["id"],
+            name: prop["name"],
+            description: prop["description"],
+            street: prop["street"],
+            address: prop["address"],
+            city: prop["city"],
+            state: prop["state"],
+            zipcode: prop["zipcode"],
+            lat: prop["lat"],
+            lng: prop["lng"],
+            room_type: prop["roomType"],
+            max_pets_allowed: prop["maxPetsAllowed"],
+            allow_same_day_booking: prop["allowSameDayBooking"],
+            bathrooms_number: prop["bathroomsNumber"],
+            bedrooms_number: prop["bedroomsNumber"],
+            price: prop["price"],
+            tax_rate: prop["propertyRentTax"],
+            cleaning_fee: prop["cleaningFee"],
+            refundable_damage_deposit: prop["refundableDamageDeposit"],
+            minimum_nights: prop["minNights"],
+            person_capacity: prop["personCapacity"],
+            country_code: prop["countryCode"],
+            check_in_time: prop["checkInTime"],
+            check_out_time: prop["checkOutTime"]
         } 
     end
 end

@@ -11,7 +11,7 @@ defmodule HostawayWeb.CustomerControllerTest do
         {status, customer} = StripeService.create_customer(name, email, phone)
         assert :ok == status
 
-        {delete, result} = StripeService.delete_customer(customer.id)
+        {delete, _} = StripeService.delete_customer(customer.id)
         assert :ok == delete
     end
 

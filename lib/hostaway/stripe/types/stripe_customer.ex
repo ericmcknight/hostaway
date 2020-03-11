@@ -1,4 +1,6 @@
 defmodule Stripe.Customer do
+
+    @derive Jason.Encoder
     
     defstruct [
         id: "",

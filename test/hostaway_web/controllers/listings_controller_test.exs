@@ -13,8 +13,8 @@ defmodule HostawayWeb.ListingsControllerTest do
         {success, value} = HostawayService.get_listing("70194")
 
         assert :ok == success
-        assert 1 == Kernel.length(value)
-        assert nil != List.first(value)
+        assert nil != value
+        assert 70194 == value.id
     end
 
 end

@@ -16,7 +16,6 @@ defmodule CalendarService do
     end
 
 
-
     defp validate_dates(start_date, end_date) do
         case validate_date_text(start_date, "Start date") do
             {:error, term} -> {:error, term}
@@ -40,7 +39,20 @@ defmodule CalendarService do
             end 
         end
     end
-    
+
+    def parse_date_text(text) do
+        Timex.parse(text, "{YYYY}-{0M}-{0D}") 
+    end
+
+    def is_less_than_today(datetime) do
+        case Timex.compare(Timex.now, datetime, :day) do
+            1   -> true 
+            0   -> false
+            -1  -> false 
+        end
+    end
+
+
     defp get_calendar(listing_id, start_date, end_date, token) do
         query_string = URI.encode_query([startDate: start_date, endDate: end_date])
         url = SettingsService.get_url() <> "listings/#{listing_id}/calendar?" <> query_string
@@ -53,16 +65,12 @@ defmodule CalendarService do
         |> handle_response()
     end
 
-    def parse_date_text(text) do
-        Timex.parse(text, "{YYYY}-{0M}-{0D}") 
+    defp handle_response({:ok, %{status_code: 200, body: json}}) do
+        {:ok, map_calendar_days(json)}
     end
 
-    def is_less_than_today(datetime) do
-        case Timex.compare(Timex.now, datetime, :day) do
-            1   -> true 
-            0   -> false
-            -1  -> false 
-        end
+    defp handle_response({:ok, %{body: json}}) do
+        {:error, json}
     end
 
     defp map_calendar_days(json) do
@@ -82,11 +90,4 @@ defmodule CalendarService do
         end
     end
 
-    defp handle_response({:ok, %{status_code: 200, body: json}}) do
-        {:ok, map_calendar_days(json)}
-    end
-
-    defp handle_response({:ok, %{body: json}}) do
-        {:error, json}
-    end
 end

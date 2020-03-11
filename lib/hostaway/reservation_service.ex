@@ -105,19 +105,11 @@ defmodule ReservationService do
         |> handle_response()
     end
 
-   
-    defp handle_response({:ok, %{body: json}}) do
-        {:error, json}
-    end
 
-    defp handle_response({:error, reason}) do
-        msg = "Http error from hostaway.com. " <> reason
-        {:error, msg}
-    end 
 
     defp handle_response({:ok, %{status_code: 200, body: json}}) do
         response = Poison.decode!(json)
-        Logger.debug(json)
+        # Logger.debug(json)
 
         prop = response["result"]
         reservation = %Reservation{
@@ -147,4 +139,14 @@ defmodule ReservationService do
 
         {:ok, reservation}
     end
+   
+    defp handle_response({:ok, %{body: json}}) do
+        {:error, json}
+    end
+
+    defp handle_response({:error, reason}) do
+        msg = "Http error from hostaway.com. " <> reason
+        {:error, msg}
+    end 
+
 end

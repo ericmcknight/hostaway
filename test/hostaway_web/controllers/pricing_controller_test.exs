@@ -33,11 +33,10 @@ defmodule HostawayWeb.PricingControllerTest do
 
 
     test "Less than minimum number of nights" do
-        {_, value} = ListingsService.get_listing(@listing_id)
-        listing = List.first(value)
+        {_, listing} = ListingsService.get_listing(@listing_id)
 
         startDate = Timex.shift(Timex.now, years: 2)
-        endDate = Timex.shift(startDate, days: listing["minimum_nights"] - 2)
+        endDate = Timex.shift(startDate, days: listing.minimum_nights - 2)
 
         {success, value} = HostawayService.get_price(@listing_id, format_date(startDate), format_date(endDate))
         assert :error == success, value
