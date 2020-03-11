@@ -10,7 +10,7 @@ defmodule PricingService do
             {:ok, listings} -> 
                 List.first(listings)
                 |> get_calendars(start_date, end_date)
-                |> calculate
+                |> calculate(start_date)
        end
     end
 
@@ -32,7 +32,7 @@ defmodule PricingService do
         end
     end
 
-    defp calculate(param) do
+    defp calculate(param, start_date) do
         # Logger.debug(param)
         case param do
             {:error, msg} -> {:error, msg}
@@ -49,12 +49,14 @@ defmodule PricingService do
                 taxes = Float.round((subtotal + cleaning_fee) * (tax_rate / 100), 2)
                 deposit = listing["refundable_damage_deposit"]
                 total = subtotal + cleaning_fee + taxes + deposit
+                
+                due_now = due_now(start_date, total - deposit)
+                second_invoice = due_second_invoice(start_date, total - deposit)
 
-                case StripeService.create_payment_intent(total) do
+                case StripeService.create_payment_intent(due_now) do
                     {:error, reason} -> {:error, reason}
                     {:ok, secret} -> 
-                        secret_key = secret["client_secret"]
-                        Logger.debug(secret_key)
+                        Logger.debug(secret.client_secret_key)
 
                         pricing = %Pricing{
                             sub_total: subtotal,
@@ -62,13 +64,44 @@ defmodule PricingService do
                             taxes: taxes,
                             refundable_damage_deposit: deposit,
                             total: total,
+                            due_now: due_now,
+                            due_later: second_invoice,
                             number_of_nights: number_of_nights,
-                            stripe_secret_key: secret_key,
+                            stripe_secret_key: secret.client_secret_key,
                             stripe_publishable_key: SettingsService.get_stripe_publishable_key()
                         }
 
                         {:ok, pricing}
                 end
        end
+    end
+
+
+    def due_now(date, total_minus_deposit) do
+        case is_less_than_10_days_from_now(date) do
+            true    -> total_minus_deposit
+            false   -> Float.round(total_minus_deposit / 2, 2)
+        end
+    end
+
+    def due_second_invoice(date, total_minus_deposit) do
+        case is_less_than_10_days_from_now(date) do
+            true    -> 0
+            false   -> Float.round(total_minus_deposit / 2, 2)
+        end
+    end
+
+    def is_less_than_10_days_from_now(date) do
+        {status, value} = Timex.parse(date, "{YYYY}-{0M}-{0D}") 
+        if :error == status do
+            {:error, "Date cannot be parsed"}
+        else 
+            minimum = Timex.shift(Timex.now, days: 10)
+            case Timex.compare(value, minimum, :day) do
+                1   -> false 
+                0   -> true 
+                -1  -> true 
+            end
+        end
     end
 end

@@ -4,24 +4,24 @@ defmodule CalendarService do
     require Logger
 
 
-    def get_calendars(listing_id, start_date_text, end_date_text) do
-        case validate_dates(start_date_text, end_date_text) do
+    def get_calendars(listing_id, start_date, end_date) do
+        case validate_dates(start_date, end_date) do
             {:error, term} -> {:error, term}
             {:ok} -> 
                 case AuthenticationService.auth() do
                     {:error, json}  -> {:error, json}
-                    {:ok, token}    -> get_calendar(listing_id, start_date_text, end_date_text, token)
+                    {:ok, token}    -> get_calendar(listing_id, start_date, end_date, token)
                 end
         end
     end
 
 
 
-    defp validate_dates(start_date_text, end_date_text) do
-        case validate_date_text(start_date_text, "Start date") do
+    defp validate_dates(start_date, end_date) do
+        case validate_date_text(start_date, "Start date") do
             {:error, term} -> {:error, term}
             {:ok} -> 
-                case validate_date_text(end_date_text, "End date") do
+                case validate_date_text(end_date, "End date") do
                     {:error, term} -> {:error, term}
                     {:ok}          -> {:ok}
                 end
