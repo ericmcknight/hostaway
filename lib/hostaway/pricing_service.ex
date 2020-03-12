@@ -5,21 +5,24 @@ defmodule PricingService do
 
 
     def get_price(listing_id, start_date, end_date) do
-        case get_listing(listing_id) do
+        case AuthenticationService.auth() do
+            {:error, json} -> {:error, json}
+            {:ok, token} -> get_price(listing_id, start_date, end_date, token)
+        end
+    end
+    
+    def get_price(listing_id, start_date, end_date, token) do
+        case ListingsService.get_listing(listing_id, token) do
             {:error, reason} -> {:error, reason}
             {:ok, listing} -> 
-                get_calendars(listing, start_date, end_date)
+                get_calendars(listing, start_date, end_date, token)
                 |> calculate(start_date)
-       end
+        end
     end
 
 
-    defp get_listing(listing_id) do
-        ListingsService.get_listing(listing_id)
-    end
-
-    defp get_calendars(listing, start_date, end_date) do
-        case CalendarService.get_calendars(listing.id, start_date, end_date) do
+    defp get_calendars(listing, start_date, end_date, token) do
+        case CalendarService.get_calendars(listing.id, start_date, end_date, token) do
             {:error, reason} -> {:error, reason}
             {:ok, calendars} -> 
                 cond do 
@@ -32,7 +35,6 @@ defmodule PricingService do
     end
 
     defp calculate(param, start_date) do
-        # Logger.debug(param)
         case param do
             {:error, msg} -> {:error, msg}
             {:ok, values} -> 
@@ -55,7 +57,6 @@ defmodule PricingService do
                 case StripeService.create_payment_intent(due_now) do
                     {:error, reason} -> {:error, reason}
                     {:ok, secret} -> 
-                        # Logger.debug(secret.client_secret_key)
                         pricing = %Pricing{
                             sub_total: subtotal,
                             cleaning_fee: cleaning_fee,

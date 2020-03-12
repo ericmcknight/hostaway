@@ -6,15 +6,19 @@ defmodule ReservationService do
     def get_reservation(reservation_id) do
         case AuthenticationService.auth() do
             {:error, json} -> {:error, json}
-            {:ok, token} -> 
-                headers = []
-                |> Keyword.put(:"Content-Type", "application/json")
-                |> Keyword.put(:"Authorization", token["token"])
-
-                get(SettingsService.get_url() <> "reservations/" <> reservation_id, headers)
-                |> handle_response()
+            {:ok, token} -> get_reservation(reservation_id, token)
        end
     end
+
+    def get_reservation(reservation_id, token) do
+        headers = []
+        |> Keyword.put(:"Content-Type", "application/json")
+        |> Keyword.put(:"Authorization", token["token"])
+
+        get(SettingsService.get_url() <> "reservations/" <> reservation_id, headers)
+        |> handle_response()
+    end
+
 
     def create(params, stripe_customer_id) do
         case AuthenticationService.auth() do
@@ -22,14 +26,6 @@ defmodule ReservationService do
             {:ok, token} -> create_reservation(params, stripe_customer_id, token)
         end
     end 
-
-    def pay(reservation_id) do
-        case AuthenticationService.auth() do
-            {:error, json} -> {:error, json}
-            {:ok, token} -> pay_for_reservation(reservation_id, token)
-        end
-    end
-
 
     defp create_reservation(params, stripe_customer_id, token) do
         listing_id = params["listing_id"]
@@ -88,6 +84,18 @@ defmodule ReservationService do
         |> handle_response()
     end
 
+
+
+    def pay(reservation_id) do
+        case AuthenticationService.auth() do
+            {:error, json} -> {:error, json}
+            {:ok, token} -> pay(reservation_id, token)
+        end
+    end
+
+    def pay(reservation_id, token) do
+        pay_for_reservation(reservation_id, token)
+    end
 
     defp pay_for_reservation(reservation_id, token) do
         url = SettingsService.get_url() <> "reservations/" <> reservation_id

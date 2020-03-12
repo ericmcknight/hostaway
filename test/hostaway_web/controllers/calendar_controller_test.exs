@@ -10,9 +10,8 @@ defmodule HostawayWeb.CalendarControllerTest do
         startDate = Timex.shift(Timex.now, months: 2)
         endDate = Timex.shift(startDate, days: 4)
 
-        {success, value} = HostawayService.get_calendars(@listing_id, format_date(startDate), format_date(endDate))
-        Logger.debug(Enum.at(value,0)["date"])
-
+        {success, _value} = HostawayService.get_calendars(@listing_id, format_date(startDate), format_date(endDate))
+        # Logger.debug(Enum.at(value,0)["date"])
         assert :ok == success
     end
 
@@ -21,7 +20,6 @@ defmodule HostawayWeb.CalendarControllerTest do
         endDate = Timex.shift(startDate, days: 4)
 
         {success, _} = HostawayService.get_calendars(@listing_id, format_date(startDate), format_date(endDate))
-
         assert :error == success
     end
 

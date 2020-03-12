@@ -4,7 +4,7 @@ defmodule Stripe.PaymentIntentService do
 
 
     def create_payment_intent(amount) do
-        url = "https://api.stripe.com/v1/payment_intents"
+        url = SettingsService.get_stripe_url() <> "/payment_intents"
 
         headers = [] 
         |> Keyword.put(:"Content-Type", "application/x-www-form-urlencoded")

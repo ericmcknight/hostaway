@@ -5,13 +5,16 @@ defmodule CalendarService do
 
 
     def get_calendars(listing_id, start_date, end_date) do
+        case AuthenticationService.auth() do
+            {:error, json}  -> {:error, json}
+            {:ok, token}    -> get_calendars(listing_id, start_date, end_date, token)
+        end
+    end
+
+    def get_calendars(listing_id, start_date, end_date, token) do
         case validate_dates(start_date, end_date) do
             {:error, term} -> {:error, term}
-            {:ok} -> 
-                case AuthenticationService.auth() do
-                    {:error, json}  -> {:error, json}
-                    {:ok, token}    -> get_calendar(listing_id, start_date, end_date, token)
-                end
+            {:ok} -> get_calendar(listing_id, start_date, end_date, token)
         end
     end
 

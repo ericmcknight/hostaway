@@ -25,6 +25,18 @@ defmodule HostawayService do
     end
 
 
+    def create_reservation(params) do
+        name = params["first_name"] <> " " <> params["last_name"]
+        email = params["email"]
+        phone = params["phone"]
+
+        case Stripe.CustomerService.create_customer(name, email, phone) do
+            {:error, term} -> {:error, term}
+            {:ok, customer} -> ReservationService.create(params, customer.id)
+        end
+    end
+
+
     def pay_reservation(reservation_id, params) do
         pricing = %Pricing{
             sub_total: params["subtotal"],
@@ -39,26 +51,24 @@ defmodule HostawayService do
             stripe_publishable_key: params["stripe_publishable_key"]
         }
 
-        case ReservationService.pay(reservation_id) do
+        {status, token} = AuthenticationService.auth()
+        if :error == status do
+            {:error, token}
+        end
+
+        case ReservationService.get_reservation(reservation_id, token) do
             {:error, term} -> {:error, term}
             {:ok, reservation} -> 
-                case ListingsService.get_listing(reservation.listing_id) do
+                case ListingsService.get_listing(Integer.to_string(reservation.listing_id), token) do
                     {:error, term} -> {:error, term}
-                    {:ok, listing} -> StripeService.create_invoices(reservation, listing, pricing)
+                    {:ok, listing} -> 
+                        case StripeService.create_invoices(reservation, listing, pricing) do
+                            {:error, term} -> {:error, term}
+                            {:ok, _} -> ReservationService.pay(reservation_id, token)
+                        end
                 end
         end
     end
 
-
-    def create_reservation(params) do
-        name = params["first_name"] <> " " <> params["last_name"]
-        email = params["email"]
-        phone = params["phone"]
-
-        case Stripe.CustomerService.create_customer(name, email, phone) do
-            {:error, term} -> {:error, term}
-            {:ok, customer} -> ReservationService.create(params, customer.id)
-        end
-    end
 
 end

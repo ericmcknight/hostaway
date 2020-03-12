@@ -4,7 +4,7 @@ defmodule Stripe.CustomerService do
 
 
     def create_customer(name, email, phone) do
-        url = "https://api.stripe.com/v1/customers"
+        url = SettingsService.get_stripe_url() <> "/customers"
 
         headers = [] 
         |> Keyword.put(:"Content-Type", "application/x-www-form-urlencoded")
@@ -40,7 +40,7 @@ defmodule Stripe.CustomerService do
 
 
     def delete_customer(customer_id) do
-        url = "https://api.stripe.com/v1/customers/" <> customer_id
+        url = SettingsService.get_stripe_url() <> "/customers/" <> customer_id
 
         headers = [] 
         |> Keyword.put(:"Content-Type", "application/x-www-form-urlencoded")

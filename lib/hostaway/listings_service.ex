@@ -5,14 +5,17 @@ defmodule ListingsService do
     def get_listings() do
         case AuthenticationService.auth() do
             {:error, json} -> {:error, json}
-            {:ok, token} -> 
-                headers = []
-                |> Keyword.put(:"Content-Type", "application/json")
-                |> Keyword.put(:"Authorization", token["token"])
+            {:ok, token} -> get_listings(token)
+        end
+    end
 
-                get(SettingsService.get_url() <> "listings/", headers)
-                |> handle_list_response()
-       end
+    def get_listings(token) do
+        headers = []
+        |> Keyword.put(:"Content-Type", "application/json")
+        |> Keyword.put(:"Authorization", token["token"])
+
+        get(SettingsService.get_url() <> "listings/", headers)
+        |> handle_list_response()
     end
 
     defp handle_list_response({:ok, %{status_code: 200, body: json}}) do
@@ -35,14 +38,17 @@ defmodule ListingsService do
     def get_listing(listing_id) do
         case AuthenticationService.auth() do
             {:error, json} -> {:error, json}
-            {:ok, token} -> 
-                headers = []
-                |> Keyword.put(:"Content-Type", "application/json")
-                |> Keyword.put(:"Authorization", token["token"])
-
-                get(SettingsService.get_url() <> "listings/" <> listing_id, headers)
-                |> handle_single_response()
+            {:ok, token} -> get_listing(listing_id, token)
        end
+    end
+
+    def get_listing(listing_id, token) do
+        headers = []
+        |> Keyword.put(:"Content-Type", "application/json")
+        |> Keyword.put(:"Authorization", token["token"])
+
+        get(SettingsService.get_url() <> "listings/" <> listing_id, headers)
+        |> handle_single_response()
     end
 
     defp handle_single_response({:ok, %{status_code: 200, body: json}}) do
