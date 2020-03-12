@@ -39,7 +39,7 @@ defmodule HostawayService do
 
     def pay_reservation(reservation_id, params) do
         pricing = %Pricing{
-            sub_total: params["subtotal"],
+            sub_total: params["sub_total"],
             cleaning_fee: params["cleaning_fee"],
             taxes: params["taxes"],
             refundable_damage_deposit: params["refundable_damage_deposit"],

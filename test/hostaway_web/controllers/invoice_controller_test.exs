@@ -18,7 +18,7 @@ defmodule HostawayWeb.InvoiceControllerTest do
     #     assert :ok == price_status
 
     #     price_params = %{
-    #         "subtotal" => price.sub_total,
+    #         "sub_total" => price.sub_total,
     #         "cleaning_fee" => price.cleaning_fee,
     #         "taxes" => price.taxes,
     #         "refundable_damage_deposit" => price.refundable_damage_deposit,
@@ -68,7 +68,7 @@ defmodule HostawayWeb.InvoiceControllerTest do
     #     assert :ok == price_status
 
     #     price_params = %{
-    #         "subtotal" => price.sub_total,
+    #         "sub_total" => price.sub_total,
     #         "cleaning_fee" => price.cleaning_fee,
     #         "taxes" => price.taxes,
     #         "refundable_damage_deposit" => price.refundable_damage_deposit,

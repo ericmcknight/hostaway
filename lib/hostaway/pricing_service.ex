@@ -77,25 +77,25 @@ defmodule PricingService do
 
 
     def due_now(date, total_minus_deposit) do
-        case is_less_than_10_days_from_now(date) do
+        case is_less_than_15_days_from_now(date) do
             true    -> total_minus_deposit
             false   -> Float.round(total_minus_deposit / 2, 2)
         end
     end
 
     def due_second_invoice(date, total_minus_deposit) do
-        case is_less_than_10_days_from_now(date) do
+        case is_less_than_15_days_from_now(date) do
             true    -> 0
             false   -> Float.round(total_minus_deposit / 2, 2)
         end
     end
 
-    def is_less_than_10_days_from_now(date) do
+    def is_less_than_15_days_from_now(date) do
         {status, value} = Timex.parse(date, "{YYYY}-{0M}-{0D}") 
         if :error == status do
             {:error, "Date cannot be parsed"}
         else 
-            minimum = Timex.shift(Timex.now, days: 10)
+            minimum = Timex.shift(Timex.now, days: 15)
             case Timex.compare(value, minimum, :day) do
                 1   -> false 
                 0   -> true 
