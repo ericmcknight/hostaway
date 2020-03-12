@@ -1,6 +1,7 @@
 defmodule Stripe.InvoiceService do
     use HTTPoison.Base
     require Logger
+    require Money
 
 
     def create_initial_invoice(reservation, listing, pricing) do
@@ -22,11 +23,8 @@ defmodule Stripe.InvoiceService do
                 {:error, term}
 
             {:ok, invoice} -> 
-                Logger.debug("invoice created successfully.")
-
                 {_f, _term} = finalize_invoice(invoice)
                 {_p, _term} = pay_invoice(invoice)
-
                 {:ok, invoice}
         end
     end
@@ -34,13 +32,13 @@ defmodule Stripe.InvoiceService do
     defp build_initial_invoice_description(listing, pricing) do
         text = "We appreciate your business. Thank you for staying with us at " <> listing.name <> "." <>
             "\n" <> 
-            "\nRental Fee: " <> Integer.to_string(pricing.sub_total) <> 
-            "\nCleaning Fee: " <> Integer.to_string(pricing.cleaning_fee) <> 
-            "\nTaxes: " <> Float.to_string(pricing.taxes, decimals: 2) <> 
-            "\nTotal: " <> Float.to_string(pricing.total, decimals: 2) <>
+            "\nRental Fee: " <> to_currency(pricing.sub_total) <> 
+            "\nCleaning Fee: " <> to_currency(pricing.cleaning_fee) <> 
+            "\nTaxes: " <> to_currency(pricing.taxes) <> 
+            "\nTotal: " <> to_currency(pricing.total) <>
             "\n" <> 
-            "\nFirst invoice due at booking (50%): " <> Float.to_string(pricing.due_now, decimals: 2) <> 
-            "\nSecond invoice due in the future: " <> Float.to_string(pricing.due_later, decimals: 2) <> 
+            "\nFirst invoice due at booking (50%): " <> to_currency(pricing.due_now) <> 
+            "\nSecond invoice due in the future: " <> to_currency(pricing.due_later) <> 
             "\n" <> 
             "\nAll deposits are 100% refundable up to 60 days prior to check in. If cancellation occurs with less " <> 
             "than 60 days, we will return any nights rent we are able to rent from another party."
@@ -55,11 +53,16 @@ defmodule Stripe.InvoiceService do
             {st, item}
         end
 
-       request = %Stripe.InvoiceRequest{
+        {st, date_time} = Timex.parse(reservation.arrival_date, "{YYYY}-{0M}-{0D}")
+        if :error == st do
+            {:error, date_time}
+        end
+
+        request = %Stripe.InvoiceRequest{
             customer_id: reservation.stripe_customer_id,
             collection_method: "send_invoice",
             description: build_second_invoice_description(listing, pricing),
-            due_date: Timex.shift(Timex.now, days: 1),
+            due_date: Timex.shift(date_time, days: -15),
         }
 
         case create_invoice(request) do
@@ -70,21 +73,28 @@ defmodule Stripe.InvoiceService do
         end
     end
 
+    def parse_date_text(text) do
+        Timex.parse(text, "{YYYY}-{0M}-{0D}") 
+    end
+
     defp build_second_invoice_description(listing, pricing) do
         text = "We appreciate your business. Thank you for staying with us at " <> listing.name <> "." <>
             "\n" <> 
-            "\nRental Fee: " <> Integer.to_string(pricing.sub_total) <> 
-            "\nCleaning Fee: " <> Integer.to_string(pricing.cleaning_fee) <> 
-            "\nTaxes: " <> Float.to_string(pricing.taxes, decimals: 2) <> 
-            "\nTotal: " <> Float.to_string(pricing.total, decimals: 2) <>
+            "\nRental Fee: " <> to_currency(pricing.sub_total) <> 
+            "\nCleaning Fee: " <> to_currency(pricing.cleaning_fee) <> 
+            "\nTaxes: " <> to_currency(pricing.taxes) <> 
+            "\nTotal: " <> to_currency(pricing.total) <>
             "\n" <> 
-            "\nFirst invoice due at booking (50%): " <> Float.to_string(pricing.due_now, decimals: 2) <> 
-            "\nSecond invoice due in the future: " <> Float.to_string(pricing.due_later, decimals: 2) <> 
+            "\nSecond invoice due in the future: " <> to_currency(pricing.due_later) <> 
             "\n" <> 
             "\nAll deposits are 100% refundable up to 60 days prior to check in. If cancellation occurs with less " <> 
             "than 60 days, we will return any nights rent we are able to rent from another party."
 
         text
+    end
+
+    def to_currency(amount) do
+        Money.to_string(Money.new(Kernel.trunc(amount * 100), :USD), symbol: true)
     end
 
 

@@ -8,3 +8,14 @@ config :hostaway, HostawayWeb.Endpoint,
 
 # Print only warnings and errors during test
 config :logger, level: :debug
+
+# money configuration
+config :money,
+  default_currency: :USD,
+  separator: ",",
+  delimiter: ".",
+  symbol: false,
+  symbol_on_right: false,
+  symbol_space: false,
+  fractional_unit: true,
+  strip_insignificant_zeros: false

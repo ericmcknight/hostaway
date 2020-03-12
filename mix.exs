@@ -44,7 +44,9 @@ defmodule Hostaway.MixProject do
       {:httpoison, "~> 1.6.1"},
       {:poison, "~> 3.1"},
 
-      {:ecto, "~> 3.0"}
+      {:ecto, "~> 3.0"},
+
+      {:money, "~> 1.4"}
     ]
   end
 end

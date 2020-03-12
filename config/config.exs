@@ -24,6 +24,17 @@ config :hostaway,
 #   max_age: 86400,
 #   methods: ["GET", "POST"]
 
+# money configuration
+config :money,
+  default_currency: :USD,
+  separator: ",",
+  delimiter: ".",
+  symbol: false,
+  symbol_on_right: false,
+  symbol_space: false,
+  fractional_unit: true,
+  strip_insignificant_zeros: false
+
 
 # Configures the endpoint
 config :hostaway, HostawayWeb.Endpoint,
