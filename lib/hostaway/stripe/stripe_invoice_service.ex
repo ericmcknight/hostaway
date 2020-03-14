@@ -5,7 +5,8 @@ defmodule Stripe.InvoiceService do
 
 
     def create_initial_invoice(reservation, listing, pricing) do
-        {st, item} = Stripe.InvoiceItemService.create_invoice_item(reservation.stripe_customer_id, pricing.due_now)
+        item_description = "Rental fees (" <> Integer.to_string(reservation.nights) <> " nights rental fee + cleaning fee + taxes)"
+        {st, item} = Stripe.InvoiceItemService.create_invoice_item(reservation.stripe_customer_id, pricing.due_now, item_description)
         if :error == st do
             {st, item}
         end
@@ -36,6 +37,7 @@ defmodule Stripe.InvoiceService do
             "\nCleaning Fee: " <> to_currency(pricing.cleaning_fee) <> 
             "\nTaxes: " <> to_currency(pricing.taxes) <> 
             "\nTotal: " <> to_currency(pricing.total) <>
+            "\nDeposit: " <> to_currency(pricing.refundable_damage_deposit) <>
             "\n" <> 
             "\nFirst invoice due at booking: " <> to_currency(pricing.due_now) <> 
             "\nSecond invoice due in the future: " <> to_currency(pricing.due_later) <> 
@@ -48,12 +50,15 @@ defmodule Stripe.InvoiceService do
 
 
     def create_second_invoice(reservation, listing, pricing) do
-        {st, due_date} = Timex.parse(reservation.arrival_date, "{YYYY}-{0M}-{0D}")
+        {st, arrival} = Timex.parse(reservation.arrival_date, "{YYYY}-{0M}-{0D}")
         if :error == st do
-            {:error, due_date}
+            {:error, arrival}
         end
 
-        {st, item} = Stripe.InvoiceItemService.create_invoice_item(reservation.stripe_customer_id, pricing.due_later)
+        due_date = Timex.shift(arrival, days: -14)
+
+        item_description = "Rental fees (" <> Integer.to_string(reservation.nights) <> " nights rental fee + cleaning fee + taxes + deposit)"
+        {st, item} = Stripe.InvoiceItemService.create_invoice_item(reservation.stripe_customer_id, pricing.due_later, item_description)
         if :error == st do
             {st, item}
         end
@@ -62,7 +67,7 @@ defmodule Stripe.InvoiceService do
             customer_id: reservation.stripe_customer_id,
             collection_method: "send_invoice",
             description: build_second_invoice_description(listing, pricing, due_date),
-            due_date: Timex.shift(due_date, days: -14),
+            due_date: due_date,
         }
 
         case create_invoice(request) do
@@ -77,16 +82,16 @@ defmodule Stripe.InvoiceService do
         Timex.parse(text, "{YYYY}-{0M}-{0D}") 
     end
 
-    defp build_second_invoice_description(listing, pricing, due_date) do
+    defp build_second_invoice_description(listing, pricing, _due_date) do
         text = "We appreciate your business. Thank you for staying with us at " <> listing.name <> "." <>
             "\n" <> 
             "\nRental Fee: " <> to_currency(pricing.sub_total) <> 
             "\nCleaning Fee: " <> to_currency(pricing.cleaning_fee) <> 
             "\nTaxes: " <> to_currency(pricing.taxes) <> 
             "\nTotal: " <> to_currency(pricing.total) <>
+            "\nDeposit: " <> to_currency(pricing.refundable_damage_deposit) <>
             "\n" <> 
             "\nAmount Due: " <> to_currency(pricing.due_later) <> 
-            "\nDue Date: " <> format_date(due_date) <> 
             "\n" <> 
             "\nAll deposits are 100% refundable up to 60 days prior to check in. If cancellation occurs with less " <> 
             "than 60 days, we will return any nights rent we are able to rent from another party."
@@ -98,11 +103,14 @@ defmodule Stripe.InvoiceService do
         Money.to_string(Money.new(Kernel.trunc(amount * 100), :USD), symbol: true)
     end
 
-    defp format_date(dt) do
-        {_, str} = Timex.format(dt, "{YYYY}-{0M}-{0D}")
-        str
-    end
+    # defp format_date(dt) do
+    #     format_date(dt, "{YYYY}-{0M}-{0D}")
+    # end
 
+    # defp format_date(dt, format) do
+    #     {_, str} = Timex.format(dt, format)
+    #     str
+    # end
 
     
     defp create_invoice(invoice_request) do

@@ -3,13 +3,13 @@ defmodule Stripe.InvoiceItemService do
     require Logger
 
 
-    def create_invoice_item(customer_id, amount) do
+    def create_invoice_item(customer_id, amount, description) do
         request = %Stripe.InvoiceItemRequest{
             # invoice_id: invoice.id,
             currency: "usd",
             customer_id: customer_id,
             amount: Kernel.trunc(amount * 100),
-            description: "Rental Fee",
+            description: description,
         }
 
         create_item(request)

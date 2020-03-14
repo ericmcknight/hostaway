@@ -33,7 +33,6 @@ defmodule ReservationService do
         depart = params["departure_date"]
         channel_id = 2000 # direct reservation
         source = "socialSphereApi"
-        status = "awaitingPayment"
 
         first_name = params["first_name"]
         last_name = params["last_name"]
@@ -76,7 +75,7 @@ defmodule ReservationService do
             "cleaningFee" => cleaning_fee,
             "isPaid" => is_paid,
             "currency" => "USD",
-            "status" => status,
+            "status" => "awaitingPayment",
             "stripeGuestId" => stripe_customer_id,
         })
         

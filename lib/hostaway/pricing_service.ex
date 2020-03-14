@@ -52,7 +52,7 @@ defmodule PricingService do
                 total = subtotal + cleaning_fee + taxes + deposit
                 
                 due_now = due_now(start_date, total - deposit)
-                second_invoice = due_second_invoice(start_date, total - deposit)
+                due_later = due_second_invoice(start_date, total - deposit, deposit)
 
                 case StripeService.create_payment_intent(due_now) do
                     {:error, reason} -> {:error, reason}
@@ -64,7 +64,7 @@ defmodule PricingService do
                             refundable_damage_deposit: deposit,
                             total: total,
                             due_now: due_now,
-                            due_later: second_invoice,
+                            due_later: due_later,
                             number_of_nights: number_of_nights,
                             stripe_secret_key: secret.client_secret_key,
                             stripe_publishable_key: SettingsService.get_stripe_publishable_key()
@@ -83,10 +83,10 @@ defmodule PricingService do
         end
     end
 
-    def due_second_invoice(date, total_minus_deposit) do
+    def due_second_invoice(date, total_minus_deposit, deposit) do
         case is_less_than_15_days_from_now(date) do
             true    -> 0
-            false   -> Float.round(total_minus_deposit / 2, 2)
+            false   -> Float.round(total_minus_deposit / 2, 2) + deposit
         end
     end
 

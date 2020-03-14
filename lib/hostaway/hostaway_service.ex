@@ -59,6 +59,11 @@ defmodule HostawayService do
         case ReservationService.get_reservation(reservation_id, token) do
             {:error, term} -> {:error, term}
             {:ok, reservation} -> 
+                if true == reservation.is_paid do
+                    Logger.debug("Reservation has already been paid")
+                    {:ok, reservation}
+                end
+
                 case ListingsService.get_listing(Integer.to_string(reservation.listing_id), token) do
                     {:error, term} -> {:error, term}
                     {:ok, listing} -> 
