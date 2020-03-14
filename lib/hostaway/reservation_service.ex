@@ -32,7 +32,7 @@ defmodule ReservationService do
         arrival = params["arrival_date"]
         depart = params["departure_date"]
         channel_id = 2000 # direct reservation
-        source = "socialSphereApi"
+        _source = "socialSphereApi"
 
         first_name = params["first_name"]
         last_name = params["last_name"]

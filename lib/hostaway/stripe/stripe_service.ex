@@ -20,7 +20,7 @@ defmodule StripeService do
     def create_invoices(reservation, listing, pricing) do
         case Stripe.InvoiceService.create_initial_invoice(reservation, listing, pricing) do
             {:error, term} -> {:error, term}
-            {:ok, invoice} -> 
+            {:ok, _invoice} -> 
                 Stripe.InvoiceService.create_second_invoice(reservation, listing, pricing)
         end
     end
