@@ -51,8 +51,8 @@ defmodule PricingService do
                 deposit = listing.refundable_damage_deposit
                 total = subtotal + cleaning_fee + taxes + deposit
                 
-                due_now = due_now(start_date, total - deposit)
-                due_later = due_second_invoice(start_date, total - deposit, deposit)
+                due_now = due_now(start_date, total - deposit, deposit)
+                due_later = due_second_invoice(start_date, total - deposit)
 
                 case StripeService.create_payment_intent(due_now) do
                     {:error, reason} -> {:error, reason}
@@ -76,17 +76,17 @@ defmodule PricingService do
     end
 
 
-    def due_now(date, total_minus_deposit) do
+    def due_now(date, total_minus_deposit, deposit) do
         case is_less_than_15_days_from_now(date) do
             true    -> total_minus_deposit
-            false   -> Float.round(total_minus_deposit / 2, 2)
+            false   -> Float.round(total_minus_deposit / 2, 2) + deposit
         end
     end
 
-    def due_second_invoice(date, total_minus_deposit, deposit) do
+    def due_second_invoice(date, total_minus_deposit) do
         case is_less_than_15_days_from_now(date) do
             true    -> 0
-            false   -> Float.round(total_minus_deposit / 2, 2) + deposit
+            false   -> Float.round(total_minus_deposit / 2, 2)
         end
     end
 

@@ -26,24 +26,29 @@ defmodule Stripe.InvoiceService do
             {:ok, invoice} -> 
                 {_f, _term} = finalize_invoice(invoice)
                 {_p, _term} = pay_invoice(invoice)
+                {s, send_term} = send_invoice(invoice)
+                if :error == s do
+                    Logger.debug(send_term)
+                end
+
                 {:ok, invoice}
         end
     end
 
     defp build_initial_invoice_description(listing, pricing) do
-        text = "We appreciate your business. Thank you for staying with us at " <> listing.name <> "." <>
+        text = "We appreciate your business. Thank you for staying with us at " <> listing.name <> "." <> 
             "\n" <> 
             "\nRental Fee: " <> to_currency(pricing.sub_total) <> 
             "\nCleaning Fee: " <> to_currency(pricing.cleaning_fee) <> 
             "\nTaxes: " <> to_currency(pricing.taxes) <> 
-            "\nTotal: " <> to_currency(pricing.total) <>
             "\nDeposit: " <> to_currency(pricing.refundable_damage_deposit) <>
+            "\nTotal: " <> to_currency(pricing.total) <>
             "\n" <> 
-            "\nFirst invoice due at booking: " <> to_currency(pricing.due_now) <> 
+            "\nFirst invoice due at booking: " <> to_currency(pricing.due_now) <> " (already PAID)" <>
             "\nSecond invoice due in the future: " <> to_currency(pricing.due_later) <> 
             "\n" <> 
             "\nAll deposits are 100% refundable up to 60 days prior to check in. If cancellation occurs with less " <> 
-            "than 60 days, we will return any nights rent we are able to rent from another party."
+            "than 60 days, we will return any nights rent we are able to rent from another party." 
 
         text
     end
@@ -83,7 +88,7 @@ defmodule Stripe.InvoiceService do
     end
 
     defp build_second_invoice_description(listing, pricing, _due_date) do
-        text = "We appreciate your business. Thank you for staying with us at " <> listing.name <> "." <>
+        text = "We appreciate your business. Thank you for staying with us at " <> listing.name <> "." <> 
             "\n" <> 
             "\nRental Fee: " <> to_currency(pricing.sub_total) <> 
             "\nCleaning Fee: " <> to_currency(pricing.cleaning_fee) <> 
@@ -102,17 +107,8 @@ defmodule Stripe.InvoiceService do
     def to_currency(amount) do
         Money.to_string(Money.new(Kernel.trunc(amount * 100), :USD), symbol: true)
     end
-
-    # defp format_date(dt) do
-    #     format_date(dt, "{YYYY}-{0M}-{0D}")
-    # end
-
-    # defp format_date(dt, format) do
-    #     {_, str} = Timex.format(dt, format)
-    #     str
-    # end
-
     
+
     defp create_invoice(invoice_request) do
         url = SettingsService.get_stripe_url() <> "/invoices"
 
@@ -157,6 +153,18 @@ defmodule Stripe.InvoiceService do
         |> handle_response() 
     end
 
+    defp send_invoice(invoice) do
+        url = SettingsService.get_stripe_url() <> "/invoices/" <> invoice.id <> "/send"
+
+        headers = [] 
+        |> Keyword.put(:"Content-Type", "application/x-www-form-urlencoded")
+        |> Keyword.put(:"Authorization", "Bearer " <> SettingsService.get_stripe_secret_key())
+       
+        body = URI.encode_query(%{}) 
+
+        HTTPoison.post(url, body, headers)
+        |> handle_response() 
+    end
 
 
     defp handle_response({:ok, %{status_code: 200, body: json}}) do

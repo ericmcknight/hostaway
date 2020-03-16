@@ -30,14 +30,14 @@ defmodule HostawayWeb.InvoiceControllerTest do
     #         "stipe_publishable_key" => price.stripe_publishable_key
     #     }
 
-    #     {status, value} = HostawayService.pay_reservation("5607752", price_params)
+    #     {status, value} = HostawayService.pay_reservation("5872809", price_params)
     #     assert :ok == status
     # end
 
 
     # test "Create pricing, reservation and invoice in Stripe" do
     #     listing_id = "70704"
-    #     start = Timex.shift(Timex.now, months: 16)
+    #     start = Timex.shift(Timex.now, months: 15)
 
     #     start_date = format_date(start) 
     #     end_date = format_date(Timex.shift(start, days: 5))
@@ -81,6 +81,10 @@ defmodule HostawayWeb.InvoiceControllerTest do
     #     }
 
     #     {status, value} = HostawayService.pay_reservation(Integer.to_string(reservation.id), price_params)
+    #     if status == :error do
+    #         Logger.debug(value)
+    #     end
+
     #     assert :ok == status
     # end
 
