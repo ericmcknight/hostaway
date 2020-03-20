@@ -76,10 +76,13 @@ defmodule Stripe.InvoiceService do
         }
 
         case create_invoice(request) do
-            {:ok, invoice} -> {:ok, invoice}
             {:error, term} -> 
                 {_d, _term} = Stripe.InvoiceItemService.delete_invoice_item(item.id)
                 {:error, term}
+
+            {:ok, invoice} -> 
+                {_f, _term} = finalize_invoice(invoice)
+                {:ok, invoice}
         end
     end
 
