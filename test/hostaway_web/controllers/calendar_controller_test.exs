@@ -26,19 +26,19 @@ defmodule HostawayWeb.CalendarControllerTest do
 
 
     test "Get calendar - parsing valid date" do
-        {result, _} = CalendarService.parse_date_text(format_date(Timex.now)) 
+        {result, _} = CalendarService.parse_date_text(format_date(Timex.local())) 
         assert :ok == result
     end
 
 
 
     test "Date is less than today" do
-        result = CalendarService.is_less_than_today(Timex.shift(Timex.now, days: -1))
+        result = CalendarService.is_less_than_today(Timex.shift(Timex.local(), days: -1))
         assert true == result
     end
 
     test "Date is today" do
-        result = CalendarService.is_less_than_today(Timex.now)
+        result = CalendarService.is_less_than_today(Timex.local())
         assert false == result
     end
 

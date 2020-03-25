@@ -48,7 +48,7 @@ defmodule CalendarService do
     end
 
     def is_less_than_today(datetime) do
-        case Timex.compare(Timex.now, datetime, :day) do
+        case Timex.compare(Timex.local(), datetime, :day) do
             1   -> true 
             0   -> false
             -1  -> false 
