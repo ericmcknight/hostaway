@@ -35,11 +35,11 @@ defmodule CalendarService do
         if :error == status do
             {:error, label <> " cannot be parsed"}
         else 
-            if is_less_than_today(date) do
-                {:error, label <> " cannot be less than today."}
-            else 
-                {:ok}
-            end 
+            # if is_less_than_today(date) do
+            #     {:error, label <> " cannot be less than today."}
+            # else 
+            {:ok}
+            # end 
         end
     end
 
