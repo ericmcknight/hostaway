@@ -85,11 +85,32 @@ defmodule CalendarService do
                 Enum.map(results, fn(day) ->
                 %{
                     "date" => day["date"] <> "T14:00:00Z",
-                    "is_available" => day["isAvailable"] == 1,
+                    "is_available" => is_available(day),
                     "price" => day["price"],
-                    "minimum_stay" => day["minimumStay"]
+                    "minimum_stay" => day["minimumStay"],
+                    "status" => day["status"],
                 } 
                 end)
+        end
+    end
+
+    defp is_available(day) do
+        # Logger.debug(day["status"])
+        # Logger.debug(res["arrivalDate"] <> " " <> day["date"])
+        # Logger.debug(day["date"])
+
+        if day["status"] == "reserved" do
+            res = List.first(day["reservations"])
+            if res["arrivalDate"] == day["date"] do
+                true
+            else 
+                false
+            end
+        else 
+            case day["isAvailable"] do
+                0 -> false
+                1 -> true
+            end
         end
     end
 
